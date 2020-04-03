@@ -1,0 +1,32 @@
+<canvas id="canvas" width="400" height="400"></canvas>
+<script src="graphics.js"></script>
+<script src="simulation.js"></script>
+<script>
+
+    const g = new Graphics(document.getElementById("canvas"));
+    const s = new Simulation(g.canvas.width, g.canvas.height);
+
+    setInterval(() => {
+        s.tick();
+        draw();
+        console.log("tick")
+    }, 50);
+
+    function draw() {
+        g.color("grey");
+        g.rect(0, 0, s.width, s.height);
+        for (let person of s.population) {
+            if (person.infected) {
+                g.color("red");
+            } else {
+                g.color("blue");
+            }
+            g.circle(person.x, person.y, 5);
+        }
+    }
+
+    for (let i = 0; i < 100; i++) {
+        s.population.push(new Person(Math.random() * s.width, Math.random() * s.height));
+    }
+
+</script>
