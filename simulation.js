@@ -2,9 +2,11 @@ class Simulation {
 
     population = [];
 
-    constructor(width, height) {
+    constructor(width, height, infectionRadius, infectionProbability) {
         this.width = width;
         this.height = height;
+        this.infectionRadius = infectionRadius;
+        this.infectionProbability = infectionProbability;
     }
 
     tick() {
@@ -27,7 +29,7 @@ class Simulation {
             }
 
             for (let otherPerson of this.population) {
-                if (otherPerson.infected && distance(person, otherPerson) < 3 && Math.random() < .8) {
+                if (otherPerson.infected && distance(person, otherPerson) < this.infectionRadius && Math.random() < this.infectionProbability) {
                     person.infected = true;
                 }
             }

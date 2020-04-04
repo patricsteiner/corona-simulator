@@ -1,6 +1,6 @@
 class Graphics {
 
-    fill = true;
+    _fill = true;
 
     constructor(canvas) {
         this.canvas = canvas;
@@ -8,18 +8,18 @@ class Graphics {
     }
 
     fill() {
-        this.fill = true;
+        this._fill = true;
     }
 
     stroke(width) {
-        this.fill = false;
+        this._fill = false;
         if (width != undefined) this.context.lineWidth = width;
     }
 
     circle(x, y, r) {
         this.context.beginPath();
         this.context.arc(x, y, r, 0, 2 * Math.PI, false);
-        if (this.fill) {
+        if (this._fill) {
             this.context.fill();
         } else {
             this.context.stroke();
@@ -27,7 +27,7 @@ class Graphics {
     }
 
     rect(x, y, w, h) {
-        if (this.fill) {
+        if (this._fill) {
             this.context.fillRect(x, y, w, h);
         } else {
             this.context.strokeRect(x, y, w, h);
