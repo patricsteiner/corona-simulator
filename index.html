@@ -16,6 +16,12 @@
     <br>
     Infection probability: <input id="infectionProbability" type="number" min="0" max="1" step="0.1" value="0.8">
     <br>
+    Isolation ratio: <input id="isolationRatio" type="number" min="0" max="1" step="0.1" value="0.4">
+    <br>
+    Days until recovered or dead: <input id="daysUntilRecoveredOrDead" type="number" min="0" max="10000" step="1" value="20">
+    <br>
+    Reinfection probability: <input id="reinfectionProbability" type="number" min="0" max="1" step="0.1" value="0.1">
+    <br>
     <button onclick="start()">Run simulation</button>
     <br>
 
@@ -30,18 +36,31 @@
 
         function start() {
             clearInterval(interval);
+
             let population = document.getElementById("population").value;
             let infectionRadius = document.getElementById("infectionRadius").value;
             let infectionProbability = document.getElementById("infectionProbability").value;
-            s = new Simulation(g.canvas.width, g.canvas.height, infectionRadius, infectionProbability);
+            let isolationRatio = document.getElementById("isolationRatio").value;
+            let daysUntilRecoveredOrDead = document.getElementById("daysUntilRecoveredOrDead").value;
+            let reinfectionProbability = document.getElementById("reinfectionProbability").value;
+
+            s = new Simulation(g.canvas.width, g.canvas.height, infectionRadius, infectionProbability, daysUntilRecoveredOrDead, reinfectionProbability);
             for (let i = 0; i < population; i++) {
                 s.population.push(new Person(Math.random() * s.width, Math.random() * s.height));
             }
+
+            for (let person of s.population) {
+                if (Math.random() < isolationRatio) {
+                    person.vx = 0;
+                    person.vy = 0;
+                }
+            }
+
             interval = setInterval(() => {
                 s.tick();
                 draw();
                 console.log("tick")
-            }, 50);
+            }, 10);
         }
 
         function draw() {
@@ -49,14 +68,23 @@
             g.fill();
             g.rect(0, 0, s.width, s.height);
             for (let person of s.population) {
-                if (person.infected) {
-                    g.color("orange");
-                    g.stroke(0.5);
-                    g.circle(person.x, person.y, s.infectionRadius);
-                    g.fill();
-                    g.color("red");
-                } else {
-                    g.color("blue");
+                switch (person.state) {
+                    case State.INFECTED: {
+                        g.color("orange");
+                        g.stroke(0.5);
+                        g.circle(person.x, person.y, s.infectionRadius);
+                        g.fill();
+                        g.color("red");
+                        break;
+                    }
+                    case State.HEALTHY: {
+                        g.color("blue");
+                        break;
+                    }
+                    case State.RECOVERED: {
+                        g.color("green");
+                        break;
+                    }
                 }
                 g.circle(person.x, person.y, 3);
             }

@@ -1,15 +1,21 @@
 class Simulation {
 
+    ticks = 0;
+    TICKS_PER_DAY = 10;
     population = [];
 
-    constructor(width, height, infectionRadius, infectionProbability) {
+    constructor(width, height, infectionRadius, infectionProbability, daysUntilRecoveredOrDead, reinfectionProbability) {
         this.width = width;
         this.height = height;
         this.infectionRadius = infectionRadius;
         this.infectionProbability = infectionProbability;
+        this.daysUntilRecoveredOrDead = daysUntilRecoveredOrDead;
+        this.reinfectionProbability = reinfectionProbability;
     }
 
     tick() {
+        this.ticks++;
+        const dayIsOver = this.ticks % this.TICKS_PER_DAY === 0;
         for (let person of this.population) {
             person.x += person.vx;
             person.y += person.vy;
@@ -29,8 +35,20 @@ class Simulation {
             }
 
             for (let otherPerson of this.population) {
-                if (otherPerson.infected && distance(person, otherPerson) < this.infectionRadius && Math.random() < this.infectionProbability) {
-                    person.infected = true;
+                if (person.state === State.HEALTHY || person.state === State.RECOVERED && Math.random() < this.reinfectionProbability) {
+                    if (otherPerson.state === State.INFECTED && distance(person, otherPerson) < this.infectionRadius && Math.random() < this.infectionProbability) {
+                        person.state = State.INFECTED;
+                    }
+                }
+            }
+
+            if (person.state === State.INFECTED) {
+                if (dayIsOver) {
+                    person.daysSinceInfection++;
+                }
+                if (person.daysSinceInfection > this.daysUntilRecoveredOrDead) {
+                    person.state = State.RECOVERED;
+                    person.daysSinceInfection = 0; // TODO move this stuff to methods in Person class
                 }
             }
         }
@@ -46,8 +64,8 @@ class Person {
 
     vx = (Math.random() -.5) * 4;
     vy = (Math.random() -.5) * 4;
-    infected = Math.random() > .9;
     daysSinceInfection = 0;
+    state = Math.random() > .9 ? State.INFECTED : State.HEALTHY;
 
     constructor(x, y) {
         this.x = x;
@@ -55,3 +73,7 @@ class Person {
     }
 
 }
+
+const State = Object.freeze({
+    HEALTHY: "HEALTHY", INFECTED: "INFECTED", RECOVERED: "RECOVERED", DEAD: "DEAD"
+});
