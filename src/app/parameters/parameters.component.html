@@ -1,0 +1,22 @@
+<form [formGroup]="parameterForm">
+
+    Initial healthy population: <input formControlName="initialHealthyPopulation" type="number" min="1" max="10000">
+    <br>
+    Initial infected population: <input formControlName="initialInfectedPopulation" type="number" min="1" max="10000">
+    <br>
+    Infection radius: <input formControlName="infectionRadius" type="number" min="0" max="1000" value="10" onchange="updateParams()">
+    <br>
+    Infection probability: <input formControlName="infectionProbability" type="number" min="0" max="1" step="0.1" value="0.8"
+        onchange="updateParams()">
+    <br>
+    Isolation ratio: <input formControlName="isolationRatio" type="number" min="0" max="1" step="0.1" value="0.4"
+        onchange="updateParams()">
+    <br>
+    Days until recovered or dead: <input formControlName="daysUntilRecoveredOrDead" type="number" min="0" max="10000" step="1"
+        value="20" onchange="updateParams()">
+    <br>
+    Reinfection probability: <input formControlName="reinfectionProbability" type="number" min="0" max="1" step="0.1" value="0.1"
+        onchange="updateParams()">
+    <br>
+
+</form>

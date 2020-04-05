@@ -1,19 +1,19 @@
-class Graphics {
+export class Graphics {
 
-    _fill = true;
+    private _fill = true;
+    private context: CanvasRenderingContext2D;
 
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.context = canvas.getContext("2d");
+    constructor(context: CanvasRenderingContext2D) {
+        this.context = context;
     }
 
     fill() {
         this._fill = true;
     }
 
-    stroke(width) {
+    stroke(width: number) {
         this._fill = false;
-        if (width != undefined) this.context.lineWidth = width;
+        if (width !== undefined) this.context.lineWidth = width;
     }
 
     circle(x, y, r) {
@@ -32,11 +32,6 @@ class Graphics {
         } else {
             this.context.strokeRect(x, y, w, h);
         }
-    }
-
-    clear() {
-        this.color("white");
-        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     color(value) {
