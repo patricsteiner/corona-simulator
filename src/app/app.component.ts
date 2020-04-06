@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Graphics } from './graphics/graphics';
 import { HEIGHT, Simulation, WIDTH } from './simulation/simulation';
 import { Person, State } from './simulation/person';
@@ -11,6 +11,12 @@ import { StatisticService } from './chart/statistic.service';
   styleUrls: ['./app.component.less']
 })
 export class AppComponent implements AfterViewInit {
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    this.scaleCanvas(event.target.innerWidth);
+    this.draw();
+  }
 
   @ViewChild('canvas') canvas: ElementRef;
   private context: CanvasRenderingContext2D;
@@ -29,10 +35,7 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     const canvas = this.canvas.nativeElement as HTMLCanvasElement;
-    canvas.width = WIDTH * this.scaleFactor;
-    canvas.height = HEIGHT * this.scaleFactor;
     this.context = canvas.getContext('2d');
-    this.context.scale(this.scaleFactor, this.scaleFactor);
     this.graphics = new Graphics(this.context);
 
     setInterval(() => {
@@ -44,7 +47,16 @@ export class AppComponent implements AfterViewInit {
       console.log('tick');
     }, 10);
 
-    this.reset();
+    this.scaleCanvas(window.innerWidth);
+    this.resetSimulation();
+  }
+
+  scaleCanvas(windowWidth: number) {
+    this.scaleFactor = Math.min(windowWidth / WIDTH, 1);
+    const canvas = this.canvas.nativeElement as HTMLCanvasElement;
+    canvas.width = WIDTH * this.scaleFactor;
+    canvas.height = HEIGHT * this.scaleFactor;
+    this.context.scale(this.scaleFactor, this.scaleFactor);
   }
 
   onMouseDown(event: MouseEvent) {
@@ -59,8 +71,8 @@ export class AppComponent implements AfterViewInit {
     this.draw();
   }
 
-  reset() {
-    const initialHealthyPopulation = 100;
+  resetSimulation() {
+    const initialHealthyPopulation = 1000;
     const initialInfectedPopulation = 3;
 
     this.simulation = new Simulation(initialHealthyPopulation, initialInfectedPopulation, this.settingService.currentValue());

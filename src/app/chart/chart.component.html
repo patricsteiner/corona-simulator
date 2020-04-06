@@ -1,12 +1,18 @@
 <ngx-charts-area-chart-normalized
-  [view]="[800,400]"
+  [view]="view"
+  [results]="data$ | async"
   [xAxis]="true"
   [yAxis]="true"
   [showXAxisLabel]="true"
   [showYAxisLabel]="true"
   xAxisLabel="Tag"
   yAxisLabel="% der Bevölkerung"
+  [rotateXAxisTicks]="true"
   [animations]="false"
   [legend]="true"
-  [results]="data$ | async">
+  legendTitle=""
+  legendPosition="below"
+  [tooltipDisabled]="true"
+  [showGridLines]="false"
+  [customColors]="customColors">
 </ngx-charts-area-chart-normalized>
