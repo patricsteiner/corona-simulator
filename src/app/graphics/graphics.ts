@@ -2,9 +2,13 @@ export class Graphics {
 
     private _fill = true;
     private context: CanvasRenderingContext2D;
+    // readonly canvasWidth: number;
+    // readonly canvasHeight: number;
 
     constructor(context: CanvasRenderingContext2D) {
         this.context = context;
+        // this.canvasWidth = this.context.canvas.width;
+        // this.canvasHeight = this.context.canvas.height;
     }
 
     fill() {
@@ -40,3 +44,4 @@ export class Graphics {
     }
 
 }
+

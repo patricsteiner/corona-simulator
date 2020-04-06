@@ -1,6 +1,12 @@
 <ngx-charts-area-chart-normalized
-  xAxisLabel="asd"
-  yAxisLabel="yAxisLabel"
+  [view]="[800,400]"
+  [xAxis]="true"
+  [yAxis]="true"
+  [showXAxisLabel]="true"
+  [showYAxisLabel]="true"
+  xAxisLabel="Tag"
+  yAxisLabel="% der Bevölkerung"
   [animations]="false"
+  [legend]="true"
   [results]="data$ | async">
 </ngx-charts-area-chart-normalized>

@@ -1,0 +1,50 @@
+<mat-list dense>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.infectionRadius" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="10"
+                min="0" max="100" step="1">asdasd
+    </mat-slider>
+    <span class="label">Ansteckungsradius</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.infectionProbability" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
+
+    <span class="label">Ansteckungswahrscheinlichkeit</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.reinfectionProbability" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
+
+    <span class="label">Wahrscheinlichkeit erneut angesteckt zu werden</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.isolationRatio" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
+
+    <span class="label">Isolation</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.daysUntilRecoveredOrDead" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="10" min="1" max="100" step="1"></mat-slider>
+
+    <span class="label">Tage bis zur Heilung</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slide-toggle [(ngModel)]="settings.bordersClosed" (change)="settingsChanged()"></mat-slide-toggle>
+
+    <mat-label><span class="label">Grenzen schliessen</span></mat-label>
+  </mat-list-item>
+
+</mat-list>
+
+
+
+
+

@@ -1,32 +1,38 @@
 import { Person, State } from './person';
+import { Wall } from './wall';
+
+export const TICKS_PER_DAY = 30;
+export const WIDTH = 800;
+export const HEIGHT = 800;
 
 export class Simulation {
 
+  readonly population: Person[] = [];
+  readonly borders: Wall[] = [];
+
   private ticks = 0;
-  readonly TICKS_PER_DAY = 10;
-
-  get day() {
-    return Math.floor(this.ticks / this.TICKS_PER_DAY);
-  }
-
-  population: Person[] = [];
-  width: number;
-  height: number;
   private settings: SimulationSettings;
 
-  constructor(width: number, height: number, initialHealthyPopulation: number, initialInfectedPopulation: number, settings: SimulationSettings) {
-    this.width = width;
-    this.height = height;
+  constructor(initialHealthyPopulation: number, initialInfectedPopulation: number, settings: SimulationSettings) {
     for (let i = 0; i < initialHealthyPopulation; i++) {
-      const person = new Person(Math.random() * this.width, Math.random() * this.height);
-      this.population.push(person);
+      this.addPerson(State.HEALTHY);
     }
     for (let i = 0; i < initialInfectedPopulation; i++) {
-      const person = new Person(Math.random() * this.width, Math.random() * this.height);
-      person.state = State.INFECTED;
-      this.population.push(person);
+      this.addPerson(State.INFECTED)
     }
     this.updateSettings(settings);
+    this.borders.push(new Wall(WIDTH/2-10, 0, 20, HEIGHT));
+    this.borders.push(new Wall(0, HEIGHT/2-10, WIDTH, 20));
+  }
+
+  get day() {
+    return Math.floor(this.ticks / TICKS_PER_DAY);
+  }
+
+  addPerson(state: State) {
+    const person = new Person(Math.random() * WIDTH, Math.random() * HEIGHT);
+    person.state = state;
+    this.population.push(person);
   }
 
   updateSettings(settings: SimulationSettings) {
@@ -41,16 +47,20 @@ export class Simulation {
     return this.settings.infectionRadius;
   }
 
+  bordersClosed() {
+    return this.settings.bordersClosed;
+  }
+
   tick(): boolean {
     this.ticks++;
-    const dayIsOver = this.ticks % this.TICKS_PER_DAY === 0;
+    const dayIsOver = this.ticks % TICKS_PER_DAY === 0;
 
     for (let person of this.population) {
       this.move(person);
 
       for (let otherPerson of this.population) {
-        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Math.random() < this.settings.reinfectionProbability) {
-          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.settings.infectionRadius && Math.random() < this.settings.infectionProbability) {
+        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Simulation.chance(this.settings.reinfectionProbability)) {
+          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.settings.infectionRadius && Simulation.chance(this.settings.infectionProbability)) {
             person.state = State.INFECTED;
           }
         }
@@ -69,10 +79,14 @@ export class Simulation {
     return dayIsOver;
   }
 
+  private static chance(probability: number) {
+    return Math.random() < probability;
+  }
+
   private applyIsolation() {
     for (let person of this.population) {
       person.randomizeVelocity();
-      if (Math.random() < this.settings.isolationRatio) {
+      if (Simulation.chance(this.settings.isolationRatio)) {
         person.stop();
       }
     }
@@ -84,16 +98,24 @@ export class Simulation {
     if (person.x < 0) {
       person.x = 0;
       person.vx *= -1;
-    } else if (person.x > this.width) {
-      person.x = this.width;
+    } else if (person.x > WIDTH) {
+      person.x = WIDTH;
       person.vx *= -1;
     }
     if (person.y < 0) {
       person.y = 0;
       person.vy *= -1;
-    } else if (person.y > this.height) {
-      person.y = this.height;
+    } else if (person.y > HEIGHT) {
+      person.y = HEIGHT;
       person.vy *= -1;
+    }
+    if (this.settings.bordersClosed) {
+      for (let border of this.borders) {
+        if (border.contains(person.x, person.y)) {
+          person.vx *= -1;
+          person.vy *= -1;
+        }
+      }
     }
   }
 
@@ -109,4 +131,5 @@ export interface SimulationSettings {
   reinfectionProbability: number;
   isolationRatio: number;
   daysUntilRecoveredOrDead: number;
+  bordersClosed: boolean;
 }

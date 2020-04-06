@@ -1,12 +1,20 @@
 <h1>CORONA SIMULATOR 9000</h1>
-<app-settings></app-settings>
-<button (click)="start()">Run simulation</button>
-<br>
-(left click to add healthy person, right click to add infected person)
-<br>
 
-<canvas #canvas width="500" height="500" oncontextmenu="return false;">
+<mat-card>
+  <mat-card-content>
+    <app-settings></app-settings>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <button mat-raised-button color="accent" (click)="reset()">Start new Simulation</button>
+    <button mat-raised-button color="primary" (click)="togglePause()">{{paused? "play" : "pause"}}</button>
+  </mat-card-actions>
+
+</mat-card>
+
+<canvas #canvas (mousedown)="onMouseDown($event)" (contextmenu)="false">
   Looks like your browser does not support this cool simulation :( Sorry about that. Please use a modern browser.
 </canvas>
 
 <app-chart></app-chart>
+

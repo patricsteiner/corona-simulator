@@ -5,7 +5,7 @@
 [X] initial population, infection radius & probability, isolation as configurable params
 [X] realtime update params
 [X] add healthy/infected people by mouse
-[] quarantine infected pople after x days
+[] quarantine infected people after x days
 [X] recover
 [] die
 [X] chance to get reinfected or become immune
@@ -17,7 +17,7 @@
 [] communities and cross-communities
 [] smarter movement (eg. avoid other people)
 [] better ui/sliders
-[] migrate from raw js to ts (with angular)
+[X] migrate from raw js to ts (with angular)
 
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.0.

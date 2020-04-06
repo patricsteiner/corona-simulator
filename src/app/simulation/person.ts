@@ -14,8 +14,8 @@ export class Person {
   }
 
   randomizeVelocity() {
-    this.vx = (Math.random() - .5) * 4;
-    this.vy = (Math.random() - .5) * 4;
+    this.vx = (Math.random() - .5) * 10; // keep in mind: if it moves to fast, it could potentially skip walls...
+    this.vy = (Math.random() - .5) * 10;
   }
 
   stop() {

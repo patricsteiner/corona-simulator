@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Graphics } from './graphics/graphics';
-import { Simulation } from './simulation/simulation';
-import { State } from './simulation/person';
+import { HEIGHT, Simulation, WIDTH } from './simulation/simulation';
+import { Person, State } from './simulation/person';
 import { SettingService } from './settings/setting.service';
 import { StatisticService } from './chart/statistic.service';
 
@@ -13,84 +13,102 @@ import { StatisticService } from './chart/statistic.service';
 export class AppComponent implements AfterViewInit {
 
   @ViewChild('canvas') canvas: ElementRef;
-  public context: CanvasRenderingContext2D;
-  private g: Graphics;
+  private context: CanvasRenderingContext2D;
+  private graphics: Graphics;
   private simulation: Simulation;
-  private interval: any;
-
-  ngAfterViewInit(): void {
-    this.context = (<HTMLCanvasElement>this.canvas.nativeElement).getContext('2d');
-    this.g = new Graphics(this.context);
-  }
+  private scaleFactor = 1;
+  paused = true;
 
   constructor(private settingService: SettingService, private statisticService: StatisticService) {
     this.settingService.simulationSettings$.subscribe(settings => {
       if (!this.simulation) return;
       this.simulation.updateSettings(settings);
+      this.draw();
     });
-
-    // canvas.addEventListener('mousedown', function (e: { which: number; }) {
-    //   const { x, y } = getCursorPosition(canvas, e);
-    //   const person = new Person(x, y);
-    //   person.randomizeVelocity();
-    //   if (e.which === 1) { // 1 = left mouse button
-    //     person.state == State.HEALTHY;
-    //   } else if (e.which === 3) { // 3 = right mouse button
-    //     person.state = State.INFECTED;
-    //   }
-    //   s.population.push(person);
-    // });
   }
 
-  async start() {
-    clearInterval(this.interval);
+  ngAfterViewInit(): void {
+    const canvas = this.canvas.nativeElement as HTMLCanvasElement;
+    canvas.width = WIDTH * this.scaleFactor;
+    canvas.height = HEIGHT * this.scaleFactor;
+    this.context = canvas.getContext('2d');
+    this.context.scale(this.scaleFactor, this.scaleFactor);
+    this.graphics = new Graphics(this.context);
 
-    const initialHealthyPopulation = 100;
-    const initialInfectedPopulation = 3;
-
-    this.simulation = new Simulation(this.canvas.nativeElement.width, this.canvas.nativeElement.height,
-      initialHealthyPopulation, initialInfectedPopulation, await this.settingService.currentValue());
-
-    this.interval = setInterval(() => {
+    setInterval(() => {
+      if (this.paused) return;
       if (this.simulation.tick()) {
         this.statisticService.capture(this.simulation);
       }
       this.draw();
       console.log('tick');
-    }, 5);
+    }, 10);
+
+    this.reset();
+  }
+
+  onMouseDown(event: MouseEvent) {
+    const { x, y } = AppComponent.getCanvasClickPosition(this.context.canvas, event, this.scaleFactor);
+    const person = new Person(x, y);
+    if (event.which === 1) { // 1 = left mouse button
+      person.state = State.HEALTHY;
+    } else if (event.which === 3) { // 3 = right mouse button
+      person.state = State.INFECTED;
+    }
+    this.simulation.population.push(person);
+    this.draw();
+  }
+
+  reset() {
+    const initialHealthyPopulation = 100;
+    const initialInfectedPopulation = 3;
+
+    this.simulation = new Simulation(initialHealthyPopulation, initialInfectedPopulation, this.settingService.currentValue());
+    this.statisticService.reset();
+    this.paused = true;
+    this.draw();
+  }
+
+  togglePause() {
+    this.paused = !this.paused;
   }
 
   draw() {
-    this.g.color('lightgrey');
-    this.g.fill();
-    this.g.rect(0, 0, this.simulation.width, this.simulation.height);
+    const g = this.graphics;
+    g.color('lightgrey');
+    g.fill();
+    g.rect(0, 0, WIDTH, HEIGHT);
+    for (let border of this.simulation.borders) {
+      g.color(this.simulation.bordersClosed() ? 'black' : 'lightgrey');
+      g.rect(border.x, border.y, border.width, border.height);
+    }
     for (let person of this.simulation.population) {
       switch (person.state) {
         case State.INFECTED: {
-          this.g.color('orange');
-          this.g.stroke(0.5);
-          this.g.circle(person.x, person.y, this.simulation.getInfectionRadius());
-          this.g.fill();
-          this.g.color('red');
+          g.color('orange');
+          g.stroke(0.5);
+          g.circle(person.x, person.y, this.simulation.getInfectionRadius());
+          g.fill();
+          g.color('red');
           break;
         }
         case State.HEALTHY: {
-          this.g.color('blue');
+          g.color('blue');
           break;
         }
         case State.RECOVERED: {
-          this.g.color('green');
+          g.color('green');
           break;
         }
       }
-      this.g.circle(person.x, person.y, 3);
+      g.circle(person.x, person.y, 3);
     }
   }
 
-  getCursorPosition(canvas: any, event: any) {
+  static getCanvasClickPosition(canvas: HTMLCanvasElement, event: MouseEvent, scaleFactor: number) {
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const x = (event.clientX - rect.left) / scaleFactor;
+    const y = (event.clientY - rect.top) / scaleFactor;
     return { x, y };
   }
 }
