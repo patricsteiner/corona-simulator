@@ -3,42 +3,54 @@ import { Person, State } from './person';
 export class Simulation {
 
   private ticks = 0;
-  private readonly TICKS_PER_DAY = 10;
+  readonly TICKS_PER_DAY = 10;
+
+  get day() {
+    return Math.floor(this.ticks / this.TICKS_PER_DAY);
+  }
+
   population: Person[] = [];
   width: number;
   height: number;
-  params: Params;
+  private settings: SimulationSettings;
 
-  constructor(width: number, height: number, params: Params) {
+  constructor(width: number, height: number, initialHealthyPopulation: number, initialInfectedPopulation: number, settings: SimulationSettings) {
     this.width = width;
     this.height = height;
-    this.params = params;
+    for (let i = 0; i < initialHealthyPopulation; i++) {
+      const person = new Person(Math.random() * this.width, Math.random() * this.height);
+      this.population.push(person);
+    }
+    for (let i = 0; i < initialInfectedPopulation; i++) {
+      const person = new Person(Math.random() * this.width, Math.random() * this.height);
+      person.state = State.INFECTED;
+      this.population.push(person);
+    }
+    this.updateSettings(settings);
   }
 
-  tick() {
+  updateSettings(settings: SimulationSettings) {
+    const prevSettings = { ...this.settings } as SimulationSettings;
+    this.settings = { ...settings } as SimulationSettings;
+    if (prevSettings.isolationRatio !== this.settings.isolationRatio) {
+      this.applyIsolation();
+    }
+  }
+
+  getInfectionRadius() {
+    return this.settings.infectionRadius;
+  }
+
+  tick(): boolean {
     this.ticks++;
     const dayIsOver = this.ticks % this.TICKS_PER_DAY === 0;
+
     for (let person of this.population) {
-      person.x += person.vx;
-      person.y += person.vy;
-      if (person.x < 0) {
-        person.x = 0;
-        person.vx *= -1;
-      } else if (person.x > this.width) {
-        person.x = this.width;
-        person.vx *= -1;
-      }
-      if (person.y < 0) {
-        person.y = 0;
-        person.vy *= -1;
-      } else if (person.y > this.height) {
-        person.y = this.height;
-        person.vy *= -1;
-      }
+      this.move(person);
 
       for (let otherPerson of this.population) {
-        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Math.random() < this.params.reinfectionProbability) {
-          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.params.infectionRadius && Math.random() < this.params.infectionProbability) {
+        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Math.random() < this.settings.reinfectionProbability) {
+          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.settings.infectionRadius && Math.random() < this.settings.infectionProbability) {
             person.state = State.INFECTED;
           }
         }
@@ -48,11 +60,40 @@ export class Simulation {
         if (dayIsOver) {
           person.daysSinceInfection++;
         }
-        if (person.daysSinceInfection > this.params.daysUntilRecoveredOrDead) {
+        if (person.daysSinceInfection > this.settings.daysUntilRecoveredOrDead) {
           person.state = State.RECOVERED;
           person.daysSinceInfection = 0; // TODO move this stuff to methods in Person class
         }
       }
+    }
+    return dayIsOver;
+  }
+
+  private applyIsolation() {
+    for (let person of this.population) {
+      person.randomizeVelocity();
+      if (Math.random() < this.settings.isolationRatio) {
+        person.stop();
+      }
+    }
+  }
+
+  private move(person: Person) {
+    person.x += person.vx;
+    person.y += person.vy;
+    if (person.x < 0) {
+      person.x = 0;
+      person.vx *= -1;
+    } else if (person.x > this.width) {
+      person.x = this.width;
+      person.vx *= -1;
+    }
+    if (person.y < 0) {
+      person.y = 0;
+      person.vy *= -1;
+    } else if (person.y > this.height) {
+      person.y = this.height;
+      person.vy *= -1;
     }
   }
 
@@ -62,11 +103,10 @@ export class Simulation {
 
 }
 
-
-export interface Params {
+export interface SimulationSettings {
   infectionRadius: number;
   infectionProbability: number;
+  reinfectionProbability: number;
   isolationRatio: number;
   daysUntilRecoveredOrDead: number;
-  reinfectionProbability: number;
 }

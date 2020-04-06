@@ -1,6 +1,9 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { Graphics } from './graphics/graphics';
-import { Person, State, Simulation } from './simulation/simulation';
+import { Simulation } from './simulation/simulation';
+import { State } from './simulation/person';
+import { SettingService } from './settings/setting.service';
+import { StatisticService } from './chart/statistic.service';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +15,7 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('canvas') canvas: ElementRef;
   public context: CanvasRenderingContext2D;
   private g: Graphics;
-  private s: Simulation;
+  private simulation: Simulation;
   private interval: any;
 
   ngAfterViewInit(): void {
@@ -20,7 +23,11 @@ export class AppComponent implements AfterViewInit {
     this.g = new Graphics(this.context);
   }
 
-  constructor() {
+  constructor(private settingService: SettingService, private statisticService: StatisticService) {
+    this.settingService.simulationSettings$.subscribe(settings => {
+      if (!this.simulation) return;
+      this.simulation.updateSettings(settings);
+    });
 
     // canvas.addEventListener('mousedown', function (e: { which: number; }) {
     //   const { x, y } = getCursorPosition(canvas, e);
@@ -35,85 +42,44 @@ export class AppComponent implements AfterViewInit {
     // });
   }
 
-  readParams() {
-    let infectionRadius = 11;
-    let infectionProbability = 1;
-    let isolationRatio = .4;
-    let daysUntilRecoveredOrDead = 11;
-    let reinfectionProbability = 0;
-    const params = {
-      infectionRadius,
-      infectionProbability,
-      isolationRatio,
-      daysUntilRecoveredOrDead,
-      reinfectionProbability
-    };
-    return params;
-  }
-
-  updateParams() {
-    const previousParams = { ...this.s.params }
-    this.s.params = this.readParams();
-    if (previousParams.isolationRatio !== this.s.params.isolationRatio) {
-      this.applyIsolation();
-    }
-  }
-
-  applyIsolation() {
-    for (let person of this.s.population) {
-      person.randomizeVelocity();
-      if (Math.random() < this.s.params.isolationRatio) {
-        person.stop();
-      }
-    }
-  }
-
-  start(): void {
+  async start() {
     clearInterval(this.interval);
 
     const initialHealthyPopulation = 100;
     const initialInfectedPopulation = 3;
 
-    this.s = new Simulation(this.canvas.nativeElement.width, this.canvas.nativeElement.height, this.readParams());
-    for (let i = 0; i < initialHealthyPopulation; i++) {
-      const person = new Person(Math.random() * this.s.width, Math.random() * this.s.height);
-      this.s.population.push(person);
-    }
-    for (let i = 0; i < initialInfectedPopulation; i++) {
-      const person = new Person(Math.random() * this.s.width, Math.random() * this.s.height);
-      person.state = State.INFECTED;
-      this.s.population.push(person);
-    }
-
-    this.applyIsolation();
+    this.simulation = new Simulation(this.canvas.nativeElement.width, this.canvas.nativeElement.height,
+      initialHealthyPopulation, initialInfectedPopulation, await this.settingService.currentValue());
 
     this.interval = setInterval(() => {
-      this.s.tick();
+      if (this.simulation.tick()) {
+        this.statisticService.capture(this.simulation);
+      }
       this.draw();
-      console.log("tick")
-    }, 10);
+      console.log('tick');
+    }, 5);
   }
 
   draw() {
-    this.g.color("lightgrey");
+    this.g.color('lightgrey');
     this.g.fill();
-    this.g.rect(0, 0, this.s.width, this.s.height);
-    for (let person of this.s.population) {
+    this.g.rect(0, 0, this.simulation.width, this.simulation.height);
+    for (let person of this.simulation.population) {
       switch (person.state) {
         case State.INFECTED: {
-          this.g.color("orange");
+          this.g.color('orange');
           this.g.stroke(0.5);
-          this.g.circle(person.x, person.y, this.s.params.infectionRadius);
+          this.g.circle(person.x, person.y, this.simulation.getInfectionRadius());
           this.g.fill();
-          this.g.color("red");
+          this.g.color('red');
           break;
         }
         case State.HEALTHY: {
-          this.g.color("blue");
+          this.g.color('blue');
           break;
         }
         case State.RECOVERED: {
-          this.g.color("green");
+          this.g.color('green');
           break;
         }
       }
