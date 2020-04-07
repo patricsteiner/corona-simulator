@@ -8,14 +8,27 @@ import { Simulation } from '../simulation/simulation';
 })
 export class StatisticService {
 
-  private dataSubject = new BehaviorSubject(new Map<State, { day: number, amount: number }[]>());
-  data$ = this.dataSubject.asObservable();
-
-  // data: Map<State, number>[] = [];
-  // data2$ = new BehaviorSubject(this.data);
+  private data = [
+    {
+      name: State.INFECTED.toString(),
+      series: []
+    },
+    {
+      name: State.HEALTHY.toString(),
+      series: []
+    },
+    {
+      name: State.RECOVERED.toString(),
+      series: []
+    }
+  ];
+  data$ = new BehaviorSubject(this.data);
 
   reset() {
-    this.dataSubject.next(new Map<State, { day: number, amount: number }[]>());
+    this.data.forEach(entry => {
+      entry.series = [];
+    });
+    this.data$.next([...this.data]);
   }
 
   capture(simulation: Simulation) {
@@ -27,17 +40,26 @@ export class StatisticService {
       }
       personsPerState.set(person.state, personsPerState.get(person.state) + 1);
     }
-    // this.data[day] = personsPerState;
-    // this.data2$.next(this.data);
-    const data = this.dataSubject.getValue();
-    personsPerState.forEach((amount, state) => {
-      if (!data.has(state)) {
-        data.set(state, []);
+    this.data[0].series.push(
+      {
+        name: day.toString(),
+        value: personsPerState.get(State.INFECTED) || 0
       }
-      data.get(state).push({ day, amount })
-    });
-
-    this.dataSubject.next(data);
+    );
+    this.data[1].series.push(
+      {
+        name: day.toString(),
+        value: personsPerState.get(State.HEALTHY) || 0
+      }
+    );
+    this.data[2].series.push(
+      {
+        name: day.toString(),
+        value: personsPerState.get(State.RECOVERED) || 0
+      }
+    );
+    this.data$.next([...this.data]); // NOTE: just passing a shallow copy... not super safe, but its good enough
   }
 
 }
+

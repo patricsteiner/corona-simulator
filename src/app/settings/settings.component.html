@@ -3,7 +3,7 @@
   <mat-list-item>
     <mat-slider [(ngModel)]="settings.infectionRadius" (change)="settingsChanged()" [thumbLabel]="true"
                 tickInterval="2"
-                min="0" max="20" step="1">asdasd
+                min="0" max="10" step="1">asdasd
     </mat-slider>
     <span class="label">Ansteckungsradius</span>
   </mat-list-item>
@@ -31,7 +31,7 @@
 
   <mat-list-item>
     <mat-slider [(ngModel)]="settings.daysUntilRecoveredOrDead" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="10" min="1" max="100" step="1"></mat-slider>
+                tickInterval="10" min="1" max="50" step="1"></mat-slider>
 
     <span class="label">Tage bis zur Heilung</span>
   </mat-list-item>

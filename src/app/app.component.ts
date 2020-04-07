@@ -45,7 +45,7 @@ export class AppComponent implements AfterViewInit {
       }
       this.draw();
       console.log('tick');
-    }, 10);
+    },  20);
 
     this.scaleCanvas(window.innerWidth);
     this.resetSimulation();
@@ -72,11 +72,12 @@ export class AppComponent implements AfterViewInit {
   }
 
   resetSimulation() {
-    const initialHealthyPopulation = 1000;
+    const initialHealthyPopulation = 444;
     const initialInfectedPopulation = 3;
 
     this.simulation = new Simulation(initialHealthyPopulation, initialInfectedPopulation, this.settingService.currentValue());
     this.statisticService.reset();
+    this.statisticService.capture(this.simulation);
     this.paused = true;
     this.draw();
   }
@@ -97,10 +98,6 @@ export class AppComponent implements AfterViewInit {
     for (let person of this.simulation.population) {
       switch (person.state) {
         case State.INFECTED: {
-          g.color('orange');
-          g.stroke(0.5);
-          g.circle(person.x, person.y, this.simulation.getInfectionRadius());
-          g.fill();
           g.color('red');
           break;
         }
@@ -113,7 +110,7 @@ export class AppComponent implements AfterViewInit {
           break;
         }
       }
-      g.circle(person.x, person.y, 3);
+      g.circle(person.x, person.y, this.simulation.getInfectionRadius());
     }
   }
 

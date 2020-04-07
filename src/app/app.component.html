@@ -1,16 +1,13 @@
-<mat-toolbar color="primary"><h1>👑 CORONA 🦠 SIMULATOR 9000</h1></mat-toolbar>
+<mat-toolbar color="primary">👑<h1>CORONA SIMULATOR 9000</h1>👑</mat-toolbar>
 
-<mat-card>
-  <mat-card-content>
-    <app-settings></app-settings>
-  </mat-card-content>
+<app-settings></app-settings>
 
-  <mat-card-actions>
-    <button mat-raised-button color="accent" (click)="resetSimulation()">Start new Simulation</button>
-    <button mat-raised-button color="primary" (click)="togglePause()">{{paused? "play" : "pause"}}</button>
-  </mat-card-actions>
-
-</mat-card>
+<mat-toolbar>
+  <button mat-mini-fab color="primary" (click)="togglePause()">
+    <mat-icon>{{paused ? "play_arrow" : "pause"}}</mat-icon>
+  </button>
+  <button mat-stroked-button color="warn" (click)="resetSimulation()">Reset</button>
+</mat-toolbar>
 
 <canvas #canvas (mousedown)="onMouseDown($event)" (contextmenu)="false">
   Looks like your browser does not support this cool simulation :( Sorry about that. Please use a modern browser.

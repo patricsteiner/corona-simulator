@@ -1,21 +1,20 @@
-import { AfterViewInit, Component, HostListener } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { StatisticService } from './statistic.service';
-import { map } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-chart',
   templateUrl: './chart.component.html',
   styleUrls: ['./chart.component.less']
 })
-export class ChartComponent implements AfterViewInit {
+export class ChartComponent {
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.view[0] = Math.min(event.target.innerWidth, 800);
   }
 
-  data$ = of([]);
+  data$ = this.statisticService.data$.pipe(delay(0));
   view = [800, 400];
   customColors = [
     {
@@ -33,21 +32,6 @@ export class ChartComponent implements AfterViewInit {
   ];
 
   constructor(private statisticService: StatisticService) {
-  }
-
-  ngAfterViewInit() {
-    this.data$ = this.statisticService.data$.pipe(
-      map(data => { // TODO mk more eficient,....
-        const res = [];
-        data.forEach((value, key) => {
-          res.push({
-            name: key,
-            series: value.map(e => ({ name: e.day.toString(), value: e.amount }))
-          });
-        });
-        return res;
-      })
-    );
   }
 
 }

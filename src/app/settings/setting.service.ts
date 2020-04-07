@@ -9,11 +9,11 @@ export class SettingService {
 
   private simulationSettings = new BehaviorSubject<SimulationSettings>(
     {
-      infectionRadius: 10,
+      infectionRadius: 3,
       infectionProbability: .8,
       isolationRatio: .4,
       daysUntilRecoveredOrDead: 20,
-      reinfectionProbability: .1,
+      reinfectionProbability: .01,
       bordersClosed: false,
     }
   );

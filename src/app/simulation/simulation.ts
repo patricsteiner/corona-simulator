@@ -60,7 +60,7 @@ export class Simulation {
 
       for (let otherPerson of this.population) {
         if (person.state === State.HEALTHY || person.state === State.RECOVERED && Simulation.chance(this.settings.reinfectionProbability)) {
-          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.settings.infectionRadius && Simulation.chance(this.settings.infectionProbability)) {
+          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.settings.infectionRadius*2 && Simulation.chance(this.settings.infectionProbability)) {
             person.state = State.INFECTED;
           }
         }
