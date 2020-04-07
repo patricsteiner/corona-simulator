@@ -1,45 +1,52 @@
-<mat-list dense>
+<mat-list>
 
   <mat-list-item>
-    <mat-slider [(ngModel)]="settings.infectionRadius" (change)="settingsChanged()" [thumbLabel]="true"
+    <mat-slider [(ngModel)]="settings.hygieneRatio" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
+
+    <span class="label">🧼👏😷 Hygiene</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.stayAtHomeRatio" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
+
+    <span class="label">🏠 Stay at home</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.socialDistance" (change)="settingsChanged()" [thumbLabel]="true"
                 tickInterval="2"
-                min="0" max="10" step="1">asdasd
+                min="0" max="10" step="1">
     </mat-slider>
-    <span class="label">Ansteckungsradius</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.infectionProbability" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
-
-    <span class="label">Ansteckungswahrscheinlichkeit</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.reinfectionProbability" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="10" min="0" max="1" step="0.01"></mat-slider>
-
-    <span class="label">Wahrscheinlichkeit erneut angesteckt zu werden</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.isolationRatio" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
-
-    <span class="label">Isolation</span>
+    <span class="label">🧍↔️🧍 Social distance</span>
   </mat-list-item>
 
   <mat-list-item>
     <mat-slider [(ngModel)]="settings.daysUntilRecoveredOrDead" (change)="settingsChanged()" [thumbLabel]="true"
                 tickInterval="10" min="1" max="50" step="1"></mat-slider>
 
-    <span class="label">Tage bis zur Heilung</span>
+    <span class="label">🕒 Virus duration</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.lethality" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="10" min="0" max="1" step="0.01"></mat-slider>
+
+    <span class="label">☠️ Lethality</span>
+  </mat-list-item>
+
+  <mat-list-item>
+    <mat-slider [(ngModel)]="settings.immunityAfterInfection" (change)="settingsChanged()" [thumbLabel]="true"
+                tickInterval="10" min="0" max="1" step="0.01"></mat-slider>
+
+    <span class="label">😎 Immunity after infection</span>
   </mat-list-item>
 
   <mat-list-item>
     <mat-slide-toggle [(ngModel)]="settings.bordersClosed" (change)="settingsChanged()"></mat-slide-toggle>
 
-    <mat-label><span class="label">Grenzen schliessen</span></mat-label>
+    <mat-label><span class="label">Close borders</span></mat-label>
   </mat-list-item>
 
 </mat-list>

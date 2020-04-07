@@ -3,10 +3,13 @@
 <app-settings></app-settings>
 
 <mat-toolbar>
+  <mat-slider [(ngModel)]="speed" (change)="setSimulationLoop()" min="1" max="200"></mat-slider>
   <button mat-mini-fab color="primary" (click)="togglePause()">
     <mat-icon>{{paused ? "play_arrow" : "pause"}}</mat-icon>
   </button>
-  <button mat-stroked-button color="warn" (click)="resetSimulation()">Reset</button>
+  <button mat-stroked-button color="warn" (click)="restartSimulation()">Restart</button>
+  <button mat-stroked-button color="warn" (click)="resetSettings()">Default Settings</button>
+
 </mat-toolbar>
 
 <canvas #canvas (mousedown)="onMouseDown($event)" (contextmenu)="false">

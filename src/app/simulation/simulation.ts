@@ -38,13 +38,13 @@ export class Simulation {
   updateSettings(settings: SimulationSettings) {
     const prevSettings = { ...this.settings } as SimulationSettings;
     this.settings = { ...settings } as SimulationSettings;
-    if (prevSettings.isolationRatio !== this.settings.isolationRatio) {
-      this.applyIsolation();
+    if (prevSettings.stayAtHomeRatio !== this.settings.stayAtHomeRatio) {
+      this.applyStayAtHomeRatio();
     }
   }
 
-  getInfectionRadius() {
-    return this.settings.infectionRadius;
+  getSocialDistance() {
+    return this.settings.socialDistance;
   }
 
   bordersClosed() {
@@ -59,8 +59,8 @@ export class Simulation {
       this.move(person);
 
       for (let otherPerson of this.population) {
-        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Simulation.chance(this.settings.reinfectionProbability)) {
-          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < this.settings.infectionRadius*2 && Simulation.chance(this.settings.infectionProbability)) {
+        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Simulation.chance(1-this.settings.immunityAfterInfection)) {
+          if (otherPerson.state === State.INFECTED && (Simulation.distance(person, otherPerson) - 2*(10-this.settings.socialDistance)) < 0 && Simulation.chance(1-this.settings.hygieneRatio)) {
             person.state = State.INFECTED;
           }
         }
@@ -83,10 +83,10 @@ export class Simulation {
     return Math.random() < probability;
   }
 
-  private applyIsolation() {
+  private applyStayAtHomeRatio() {
     for (let person of this.population) {
       person.randomizeVelocity();
-      if (Simulation.chance(this.settings.isolationRatio)) {
+      if (Simulation.chance(this.settings.stayAtHomeRatio)) {
         person.stop();
       }
     }
@@ -126,10 +126,11 @@ export class Simulation {
 }
 
 export interface SimulationSettings {
-  infectionRadius: number;
-  infectionProbability: number;
-  reinfectionProbability: number;
-  isolationRatio: number;
+  socialDistance: number;
+  hygieneRatio: number;
+  immunityAfterInfection: number;
+  stayAtHomeRatio: number;
   daysUntilRecoveredOrDead: number;
+  lethality: number;
   bordersClosed: boolean;
 }

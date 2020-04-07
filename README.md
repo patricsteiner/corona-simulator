@@ -11,13 +11,15 @@
 [X] chance to get reinfected or become immune
 [] bug: if 2 persons spawn on top of each other and stay there, they will reinfect each other forever
 [] find vaccine
-[] realtime graphs
+[X] realtime graphs
 [] calculate realworld params (eg what is 2meters?)
 [] points of interests (and open/close them)
 [] communities and cross-communities
 [] smarter movement (eg. avoid other people)
-[] better ui/sliders
+[X] better ui/sliders
 [X] migrate from raw js to ts (with angular)
+[X] open/close borders
+[] cleanup, remove unused modules
 
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.0.

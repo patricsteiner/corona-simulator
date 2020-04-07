@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { Graphics } from './graphics/graphics';
 import { HEIGHT, Simulation, WIDTH } from './simulation/simulation';
 import { Person, State } from './simulation/person';
@@ -23,7 +23,9 @@ export class AppComponent implements AfterViewInit {
   private graphics: Graphics;
   private simulation: Simulation;
   private scaleFactor = 1;
-  paused = true;
+  private simulationLoop: any;
+  speed = 175;
+  paused = false;
 
   constructor(private settingService: SettingService, private statisticService: StatisticService) {
     this.settingService.simulationSettings$.subscribe(settings => {
@@ -37,18 +39,21 @@ export class AppComponent implements AfterViewInit {
     const canvas = this.canvas.nativeElement as HTMLCanvasElement;
     this.context = canvas.getContext('2d');
     this.graphics = new Graphics(this.context);
+    this.scaleCanvas(window.innerWidth);
+    this.restartSimulation();
+    this.setSimulationLoop();
+  }
 
-    setInterval(() => {
+  setSimulationLoop() {
+    if (this.simulationLoop) clearInterval(this.simulationLoop);
+    const delay = 201 - this.speed;
+    this.simulationLoop = setInterval(() => {
       if (this.paused) return;
       if (this.simulation.tick()) {
         this.statisticService.capture(this.simulation);
       }
       this.draw();
-      console.log('tick');
-    },  20);
-
-    this.scaleCanvas(window.innerWidth);
-    this.resetSimulation();
+    }, delay);
   }
 
   scaleCanvas(windowWidth: number) {
@@ -71,15 +76,18 @@ export class AppComponent implements AfterViewInit {
     this.draw();
   }
 
-  resetSimulation() {
-    const initialHealthyPopulation = 444;
-    const initialInfectedPopulation = 3;
+  restartSimulation() {
+    const initialHealthyPopulation = 100;
+    const initialInfectedPopulation = 1;
 
     this.simulation = new Simulation(initialHealthyPopulation, initialInfectedPopulation, this.settingService.currentValue());
     this.statisticService.reset();
     this.statisticService.capture(this.simulation);
-    this.paused = true;
     this.draw();
+  }
+
+  resetSettings() {
+    this.settingService.resetToDefaults();
   }
 
   togglePause() {
@@ -95,7 +103,13 @@ export class AppComponent implements AfterViewInit {
       g.color(this.simulation.bordersClosed() ? 'black' : 'lightgrey');
       g.rect(border.x, border.y, border.width, border.height);
     }
+    const socialDistance = this.simulation.getSocialDistance();
+    g.fill();
     for (let person of this.simulation.population) {
+      if (socialDistance < 10) { // we invert it, a high social distance means a small extra infection radius
+        g.color('#eeeeee');
+        g.circle(person.x, person.y, 10 - socialDistance);
+      }
       switch (person.state) {
         case State.INFECTED: {
           g.color('red');
@@ -110,7 +124,7 @@ export class AppComponent implements AfterViewInit {
           break;
         }
       }
-      g.circle(person.x, person.y, this.simulation.getInfectionRadius());
+      g.circle(person.x, person.y, 3);
     }
   }
 
