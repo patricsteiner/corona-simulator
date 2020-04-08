@@ -4,6 +4,7 @@ import { Wall } from './wall';
 export const TICKS_PER_DAY = 30;
 export const WIDTH = 800;
 export const HEIGHT = 800;
+export const MAX_PHYSICAL_DISTANCE = 7;
 
 export class Simulation {
 
@@ -13,16 +14,16 @@ export class Simulation {
   private ticks = 0;
   private settings: SimulationSettings;
 
-  constructor(initialHealthyPopulation: number, initialInfectedPopulation: number, settings: SimulationSettings) {
-    for (let i = 0; i < initialHealthyPopulation; i++) {
+  constructor(settings: SimulationSettings) {
+    for (let i = 0; i < settings.initialHealthyPopulation; i++) {
       this.addPerson(State.HEALTHY);
     }
-    for (let i = 0; i < initialInfectedPopulation; i++) {
-      this.addPerson(State.INFECTED)
+    for (let i = 0; i < settings.initialInfectedPopulation; i++) {
+      this.addPerson(State.INFECTED);
     }
     this.updateSettings(settings);
-    this.borders.push(new Wall(WIDTH/2-10, 0, 20, HEIGHT));
-    this.borders.push(new Wall(0, HEIGHT/2-10, WIDTH, 20));
+    this.borders.push(new Wall(WIDTH / 2 - 10, 0, 20, HEIGHT));
+    this.borders.push(new Wall(0, HEIGHT / 2 - 10, WIDTH, 20));
   }
 
   get day() {
@@ -43,8 +44,8 @@ export class Simulation {
     }
   }
 
-  getSocialDistance() {
-    return this.settings.socialDistance;
+  physicalDistance() {
+    return this.settings.physicalDistance;
   }
 
   bordersClosed() {
@@ -52,15 +53,19 @@ export class Simulation {
   }
 
   tick(): boolean {
+    const infectionRadius = 1 + 2 * (MAX_PHYSICAL_DISTANCE - this.settings.physicalDistance);
+    // the infection radius increases as the physical distance decreases
     this.ticks++;
     const dayIsOver = this.ticks % TICKS_PER_DAY === 0;
 
     for (let person of this.population) {
-      this.move(person);
+      if (person.state !== State.DEAD) {
+        this.move(person);
+      }
 
       for (let otherPerson of this.population) {
-        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Simulation.chance(1-this.settings.immunityAfterInfection)) {
-          if (otherPerson.state === State.INFECTED && (Simulation.distance(person, otherPerson) - 2*(10-this.settings.socialDistance)) < 0 && Simulation.chance(1-this.settings.hygieneRatio)) {
+        if (person.state === State.HEALTHY || person.state === State.RECOVERED && Simulation.chance(1 - this.settings.immunityAfterInfection)) {
+          if (otherPerson.state === State.INFECTED && Simulation.distance(person, otherPerson) < infectionRadius && Simulation.chance(1 - this.settings.hygieneRatio)) {
             person.state = State.INFECTED;
           }
         }
@@ -71,7 +76,11 @@ export class Simulation {
           person.daysSinceInfection++;
         }
         if (person.daysSinceInfection > this.settings.daysUntilRecoveredOrDead) {
-          person.state = State.RECOVERED;
+          if (Simulation.chance(this.settings.lethality)) {
+            person.state = State.DEAD;
+          } else {
+            person.state = State.RECOVERED;
+          }
           person.daysSinceInfection = 0; // TODO move this stuff to methods in Person class
         }
       }
@@ -126,11 +135,13 @@ export class Simulation {
 }
 
 export interface SimulationSettings {
-  socialDistance: number;
-  hygieneRatio: number;
+  initialHealthyPopulation: number;
+  initialInfectedPopulation: number;
   immunityAfterInfection: number;
-  stayAtHomeRatio: number;
   daysUntilRecoveredOrDead: number;
   lethality: number;
+  physicalDistance: number;
+  hygieneRatio: number;
+  stayAtHomeRatio: number;
   bordersClosed: boolean;
 }

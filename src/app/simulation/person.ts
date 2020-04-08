@@ -29,6 +29,5 @@ export enum State {
   HEALTHY = 'HEALTHY',
   INFECTED = 'INFECTED',
   RECOVERED = 'RECOVERED',
-  IMMUNE = 'IMMUNE',
   DEAD = 'DEAD',
 }

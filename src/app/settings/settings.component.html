@@ -1,57 +1,96 @@
-<mat-list>
+<mat-tab-group selectedIndex="2">
+  <mat-tab label="Initial">
+    <mat-list>
+      <mat-list-item>
+        <mat-slider [(ngModel)]="settings.initialHealthyPopulation" (change)="settingsChanged()" [thumbLabel]="true"
+                    tickInterval="100" min="1" max="1000" step="1"></mat-slider>
+        <span class="label">🙂 Healthy population</span>
+      </mat-list-item>
 
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.hygieneRatio" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
-
-    <span class="label">🧼👏😷 Hygiene</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.stayAtHomeRatio" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
-
-    <span class="label">🏠 Stay at home</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.socialDistance" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="2"
-                min="0" max="10" step="1">
-    </mat-slider>
-    <span class="label">🧍↔️🧍 Social distance</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.daysUntilRecoveredOrDead" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="10" min="1" max="50" step="1"></mat-slider>
-
-    <span class="label">🕒 Virus duration</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.lethality" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="10" min="0" max="1" step="0.01"></mat-slider>
-
-    <span class="label">☠️ Lethality</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slider [(ngModel)]="settings.immunityAfterInfection" (change)="settingsChanged()" [thumbLabel]="true"
-                tickInterval="10" min="0" max="1" step="0.01"></mat-slider>
-
-    <span class="label">😎 Immunity after infection</span>
-  </mat-list-item>
-
-  <mat-list-item>
-    <mat-slide-toggle [(ngModel)]="settings.bordersClosed" (change)="settingsChanged()"></mat-slide-toggle>
-
-    <mat-label><span class="label">Close borders</span></mat-label>
-  </mat-list-item>
-
-</mat-list>
+      <mat-list-item>
+        <mat-slider [(ngModel)]="settings.initialInfectedPopulation" (change)="settingsChanged()" [thumbLabel]="true"
+                    tickInterval="10" min="1" max="100" step="1"></mat-slider>
+        <span class="label">🤒 Infected population</span>
+      </mat-list-item>
+      <mat-list-item>
+        <button mat-stroked-button color="warn" (click)="reset()">Reset all settings</button>
+      </mat-list-item>
+    </mat-list>
+  </mat-tab>
 
 
+  <mat-tab label="Virus">
+    <mat-list>
+      <mat-list-item>
+        <div matTooltip="After this amount of days, infected people will either recover or die. RIP.">
+          <mat-slider [(ngModel)]="settings.daysUntilRecoveredOrDead" (change)="settingsChanged()" [thumbLabel]="true"
+                      tickInterval="10" min="1" max="50" step="1"></mat-slider>
+          <span class="label">🕒 Duration</span>
+        </div>
+      </mat-list-item>
+
+      <!--<mat-list-item>-->
+      <div class="customListItem" matTooltip="Probability of dying after being infected.">
+        <mat-button-toggle-group [(ngModel)]="settings.lethality" (change)="settingsChanged()">
+          <mat-button-toggle [value]="0">0%</mat-button-toggle>
+          <mat-button-toggle [value]="0.01">1%</mat-button-toggle>
+          <mat-button-toggle [value]="0.10">10%</mat-button-toggle>
+          <mat-button-toggle [value]="1">100%</mat-button-toggle>
+        </mat-button-toggle-group>
+        <span class="label"> ☠️ Lethality</span>
+      </div>
+      <!--</mat-list-item>-->
+
+      <!--<mat-list-item>-->
+      <div class="customListItem">
+        <mat-button-toggle-group [(ngModel)]="settings.immunityAfterInfection" (change)="settingsChanged()">
+          <mat-button-toggle [value]="0">0%</mat-button-toggle>
+          <mat-button-toggle [value]="0.9">90%</mat-button-toggle>
+          <mat-button-toggle [value]="0.99">99%</mat-button-toggle>
+          <mat-button-toggle [value]="1">100%</mat-button-toggle>
+        </mat-button-toggle-group>
+        <span class="label"> 😎 Immunity after infection</span>
+      </div>
+      <!--</mat-list-item>-->
+    </mat-list>
+  </mat-tab>
 
 
+  <mat-tab label="World">
+    <mat-list>
+      <mat-list-item>
+        <div matTooltip="A high hygiene reduces the risk of infection when people meet.">
+          <mat-slider [(ngModel)]="settings.hygieneRatio" (change)="settingsChanged()" [thumbLabel]="true"
+                      tickInterval="1" min="0" max="0.9" step="0.1"></mat-slider>
+          <span class="label">👏 Hygiene</span>
+        </div>
+      </mat-list-item>
 
+      <mat-list-item>
+        <div matTooltip="Percentage of the population that does not move (i.e. stays at home).">
+          <mat-slider [(ngModel)]="settings.stayAtHomeRatio" (change)="settingsChanged()" [thumbLabel]="true"
+                      tickInterval="1" min="0" max="1" step="0.1"></mat-slider>
+          <span class="label">🏠 Stay at home</span>
+        </div>
+      </mat-list-item>
+
+      <mat-list-item>
+        <div
+          matTooltip="People can get infected as soon as they touch each others radius. High physical distance lowers that radius.">
+          <mat-slider [(ngModel)]="settings.physicalDistance" (change)="settingsChanged()" [thumbLabel]="true"
+                      tickInterval="2"
+                      min="0" max="7" step="1">
+          </mat-slider>
+          <span class="label">↔️ Physical distance</span>
+        </div>
+      </mat-list-item>
+
+      <mat-list-item>
+        <div matTooltip="Some poor guys might get stuck in the borders. Life's tough sometimes...">
+          <mat-slide-toggle [(ngModel)]="settings.bordersClosed" (change)="settingsChanged()"></mat-slide-toggle>
+          <mat-label><span class="label">🚧 Close borders</span></mat-label>
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </mat-tab>
+</mat-tab-group>

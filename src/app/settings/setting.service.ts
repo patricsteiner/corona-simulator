@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class SettingService {
 
-  private simulationSettings = new BehaviorSubject<SimulationSettings>(this.defaultSettings());
+  private simulationSettings = new BehaviorSubject<SimulationSettings>(SettingService.defaultSettings());
   simulationSettings$ = this.simulationSettings.asObservable();
 
   currentValue() {
@@ -15,18 +15,20 @@ export class SettingService {
   }
 
   set(settings: SimulationSettings) {
-    this.simulationSettings.next(<SimulationSettings>{ ...settings });
+    this.simulationSettings.next({ ...settings } as SimulationSettings);
   }
 
   resetToDefaults() {
-    this.simulationSettings.next(this.defaultSettings());
+    this.simulationSettings.next(SettingService.defaultSettings());
   }
 
-  private defaultSettings() {
+  private static defaultSettings() {
     return {
-      socialDistance: 3,
-      hygieneRatio: .2,
-      stayAtHomeRatio: .2,
+      initialHealthyPopulation: 99,
+      initialInfectedPopulation: 1,
+      physicalDistance: 0,
+      hygieneRatio: 0,
+      stayAtHomeRatio: 0,
       daysUntilRecoveredOrDead: 20,
       lethality: 0.01,
       immunityAfterInfection: .99,

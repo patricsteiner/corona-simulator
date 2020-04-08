@@ -19,12 +19,16 @@ export class SettingsComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.sub.unsubscribe();
   }
 
   settingsChanged() {
     this.settingService.set(this.settings);
+  }
+
+  reset() {
+    this.settingService.resetToDefaults();
   }
 
 }

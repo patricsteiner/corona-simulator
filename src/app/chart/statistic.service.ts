@@ -20,6 +20,10 @@ export class StatisticService {
     {
       name: State.RECOVERED.toString(),
       series: []
+    },
+    {
+      name: State.DEAD.toString(),
+      series: []
     }
   ];
   data$ = new BehaviorSubject(this.data);
@@ -56,6 +60,12 @@ export class StatisticService {
       {
         name: day.toString(),
         value: personsPerState.get(State.RECOVERED) || 0
+      }
+    );
+    this.data[3].series.push(
+      {
+        name: day.toString(),
+        value: personsPerState.get(State.DEAD) || 0
       }
     );
     this.data$.next([...this.data]); // NOTE: just passing a shallow copy... not super safe, but its good enough

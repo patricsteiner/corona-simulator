@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { StatisticService } from './statistic.service';
 import { delay } from 'rxjs/operators';
+import { stateToColor } from '../shared/constants';
 
 @Component({
   selector: 'app-chart',
@@ -16,20 +17,7 @@ export class ChartComponent implements OnInit {
 
   data$ = this.statisticService.data$.pipe(delay(0));
   view = [800, 400];
-  customColors = [
-    {
-      name: 'HEALTHY',
-      value: '#0000ff'
-    },
-    {
-      name: 'INFECTED',
-      value: '#ff0000'
-    },
-    {
-      name: 'RECOVERED',
-      value: '#00aa00'
-    }
-  ];
+  customColors = Object.keys(stateToColor).map(key => ({ name: key, value: stateToColor[key] }));
 
   constructor(private statisticService: StatisticService) {
   }
@@ -39,7 +27,9 @@ export class ChartComponent implements OnInit {
   }
 
   scaleChartSize(windowWidth: number) {
-    this.view = [Math.min(windowWidth, 800), 400];
+    const width = Math.min(windowWidth, 800);
+    const heigth = width < 800 ? 200 : 400;
+    this.view = [width, heigth];
   }
 
 }

@@ -1,9 +1,10 @@
 import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { Graphics } from './graphics/graphics';
-import { HEIGHT, Simulation, WIDTH } from './simulation/simulation';
+import { HEIGHT, MAX_PHYSICAL_DISTANCE, Simulation, WIDTH } from './simulation/simulation';
 import { Person, State } from './simulation/person';
 import { SettingService } from './settings/setting.service';
 import { StatisticService } from './chart/statistic.service';
+import { stateToColor } from './shared/constants';
 
 @Component({
   selector: 'app-root',
@@ -24,8 +25,9 @@ export class AppComponent implements AfterViewInit {
   private simulation: Simulation;
   private scaleFactor = 1;
   private simulationLoop: any;
-  speed = 175;
   paused = false;
+  fastForward = false;
+  addHealthyOnClick = true;
 
   constructor(private settingService: SettingService, private statisticService: StatisticService) {
     this.settingService.simulationSettings$.subscribe(settings => {
@@ -46,7 +48,7 @@ export class AppComponent implements AfterViewInit {
 
   setSimulationLoop() {
     if (this.simulationLoop) clearInterval(this.simulationLoop);
-    const delay = 201 - this.speed;
+    const delay = this.fastForward ? 5 : 30;
     this.simulationLoop = setInterval(() => {
       if (this.paused) return;
       if (this.simulation.tick()) {
@@ -67,20 +69,19 @@ export class AppComponent implements AfterViewInit {
   onMouseDown(event: MouseEvent) {
     const { x, y } = AppComponent.getCanvasClickPosition(this.context.canvas, event, this.scaleFactor);
     const person = new Person(x, y);
+    const leftButtonState = this.addHealthyOnClick ? State.HEALTHY : State.INFECTED;
+    const rightButtonState = this.addHealthyOnClick ? State.INFECTED : State.HEALTHY;
     if (event.which === 1) { // 1 = left mouse button
-      person.state = State.HEALTHY;
+      person.state = leftButtonState;
     } else if (event.which === 3) { // 3 = right mouse button
-      person.state = State.INFECTED;
+      person.state = rightButtonState;
     }
     this.simulation.population.push(person);
     this.draw();
   }
 
   restartSimulation() {
-    const initialHealthyPopulation = 100;
-    const initialInfectedPopulation = 1;
-
-    this.simulation = new Simulation(initialHealthyPopulation, initialInfectedPopulation, this.settingService.currentValue());
+    this.simulation = new Simulation(this.settingService.currentValue());
     this.statisticService.reset();
     this.statisticService.capture(this.simulation);
     this.draw();
@@ -94,37 +95,31 @@ export class AppComponent implements AfterViewInit {
     this.paused = !this.paused;
   }
 
+  toggleFastForward() {
+    this.fastForward = !this.fastForward;
+    this.setSimulationLoop();
+  }
+
   draw() {
     const g = this.graphics;
-    g.color('lightgrey');
+    const bgColor = '#fafafa';
+    g.color(bgColor);
     g.fill();
     g.rect(0, 0, WIDTH, HEIGHT);
     for (let border of this.simulation.borders) {
-      g.color(this.simulation.bordersClosed() ? 'black' : 'lightgrey');
+      g.color(this.simulation.bordersClosed() ? 'darkgray' : bgColor);
       g.rect(border.x, border.y, border.width, border.height);
     }
-    const socialDistance = this.simulation.getSocialDistance();
+    const physicalDistance = this.simulation.physicalDistance();
     g.fill();
     for (let person of this.simulation.population) {
-      if (socialDistance < 10) { // we invert it, a high social distance means a small extra infection radius
-        g.color('#eeeeee');
-        g.circle(person.x, person.y, 10 - socialDistance);
+      if (person.state === State.DEAD) {
+        g.text('💀', person.x, person.y, 14);
+      } else {
+        g.color(stateToColor[person.state]);
+        g.circle(person.x, person.y, 2 + MAX_PHYSICAL_DISTANCE - physicalDistance);
+        // we invert it, a high social distance means a small extra infection radius. we add 2 just because otherwise we cant see shit.
       }
-      switch (person.state) {
-        case State.INFECTED: {
-          g.color('red');
-          break;
-        }
-        case State.HEALTHY: {
-          g.color('blue');
-          break;
-        }
-        case State.RECOVERED: {
-          g.color('green');
-          break;
-        }
-      }
-      g.circle(person.x, person.y, 3);
     }
   }
 

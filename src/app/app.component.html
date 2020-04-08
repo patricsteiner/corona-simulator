@@ -1,14 +1,25 @@
-<mat-toolbar color="primary">👑<h1>CORONA SIMULATOR 9000</h1>👑</mat-toolbar>
+<mat-toolbar color="primary"><h1>👑 CORONA SIMULATOR 9000 👑</h1></mat-toolbar>
 
 <app-settings></app-settings>
 
 <mat-toolbar>
-  <mat-slider [(ngModel)]="speed" (change)="setSimulationLoop()" min="1" max="200"></mat-slider>
+  <button mat-mini-fab color="primary" (click)="restartSimulation()"
+          matTooltip="Restart simulation. (Should I use a different Icon? If so, which one?)">
+    <mat-icon>skip_previous</mat-icon>
+  </button>
   <button mat-mini-fab color="primary" (click)="togglePause()">
     <mat-icon>{{paused ? "play_arrow" : "pause"}}</mat-icon>
   </button>
-  <button mat-stroked-button color="warn" (click)="restartSimulation()">Restart</button>
-  <button mat-stroked-button color="warn" (click)="resetSettings()">Default Settings</button>
+  <button mat-mini-fab [color]="fastForward ? 'accent' : 'primary'" (click)="toggleFastForward()"
+          matTooltip="Fast forward the simulation. Depending on the size of the population, this might be a bit stressful for your device ;)">
+    <mat-icon>fast_forward</mat-icon>
+  </button>
+
+  <mat-button-toggle-group [(ngModel)]="addHealthyOnClick"
+                           matTooltip="Tap on the map to add persons. (You can use right click too!)">
+    <mat-button-toggle [value]="true">🙂</mat-button-toggle>
+    <mat-button-toggle [value]="false">🤒</mat-button-toggle>
+  </mat-button-toggle-group>
 
 </mat-toolbar>
 
