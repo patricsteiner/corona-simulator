@@ -25,7 +25,7 @@ export class AppComponent implements AfterViewInit {
   private simulation: Simulation;
   private scaleFactor = 1;
   private simulationLoop: any;
-  paused = false;
+  paused = true;
   fastForward = false;
   addHealthyOnClick = true;
 
@@ -81,14 +81,11 @@ export class AppComponent implements AfterViewInit {
   }
 
   restartSimulation() {
+    this.paused = true;
     this.simulation = new Simulation(this.settingService.currentValue());
     this.statisticService.reset();
     this.statisticService.capture(this.simulation);
     this.draw();
-  }
-
-  resetSettings() {
-    this.settingService.resetToDefaults();
   }
 
   togglePause() {

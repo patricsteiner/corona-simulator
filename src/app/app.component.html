@@ -4,10 +4,10 @@
 
 <mat-toolbar>
   <button mat-mini-fab color="primary" (click)="restartSimulation()"
-          matTooltip="Restart simulation. (Should I use a different Icon? If so, which one?)">
-    <mat-icon>skip_previous</mat-icon>
+          matTooltip="Restart simulation.">
+    <mat-icon>refresh</mat-icon>
   </button>
-  <button mat-mini-fab color="primary" (click)="togglePause()">
+  <button mat-mini-fab color="primary" (click)="togglePause()" matTooltip="Play/pause the simulation.">
     <mat-icon>{{paused ? "play_arrow" : "pause"}}</mat-icon>
   </button>
   <button mat-mini-fab [color]="fastForward ? 'accent' : 'primary'" (click)="toggleFastForward()"
@@ -29,3 +29,8 @@
 
 <app-chart></app-chart>
 
+<footer>
+  <a href="https://patricsteiner.github.io/">about</a>
+  |
+  <a href="https://github.com/patricsteiner/corona-simulator">contribute</a>
+</footer>
